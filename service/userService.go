@@ -5,12 +5,15 @@ import (
 	"fmt"
 )
 
+// In-memory database of users
 var Users []types.User
 
+// GetUsers retrieves all users from the in-memory database.
 func GetUsers() []types.User {
 	return Users
 }
 
+// GetUserById retrieves a user by their ID from the in-memory database.
 func GetUserById(id int) types.User {
 	var user types.User
 	for i := 0; i < len(Users); i++ {
@@ -22,13 +25,13 @@ func GetUserById(id int) types.User {
 	return user
 }
 
+// AddUser adds a new user to the in-memory database and returns the added user.
 func AddUser(user types.User) types.User {
-
 	Users = append(Users, user)
-
 	return user
 }
 
+// Update a User to the in-memory database and returns the updated user.
 func UpdateUser(id int, updatedUser types.User) types.User {
 	var existingUser types.User
 	var existingAddress types.Address
@@ -55,7 +58,15 @@ func UpdateUser(id int, updatedUser types.User) types.User {
 	return existingUser
 }
 
+// Delete user from an in-memory database
 func DeleteUser(id int) {
-	Users = append(Users[:id], Users[id+1:]...)
-	fmt.Printf("User with %d deleted successfully ", id)
+	if id < len(Users)-1 && id >= 0 {
+		Users = append(Users[:id], Users[id+1:]...)
+		fmt.Printf("User with %d deleted successfully ", id)
+	} else if id == len(Users) {
+		Users = append(Users[:id-1])
+		fmt.Printf("User with %d deleted successfully ", id)
+	} else {
+		fmt.Println("Can't delete user because id is not present in database")
+	}
 }
