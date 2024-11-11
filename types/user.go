@@ -9,8 +9,9 @@ type User struct {
 }
 
 type Address struct {
-	Country string
-	State   string
-	City    string
-	ZipCode int
+	AddressId int
+	Country   string
+	State     string
+	City      string
+	ZipCode   int
 }
