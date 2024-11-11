@@ -64,7 +64,7 @@ func DeleteUser(id int) {
 		Users = append(Users[:id], Users[id+1:]...)
 		fmt.Printf("User with %d deleted successfully ", id)
 	} else if id == len(Users) {
-		Users = append(Users[:id-1])
+		Users = append(Users[0 : id-1])
 		fmt.Printf("User with %d deleted successfully ", id)
 	} else {
 		fmt.Println("Can't delete user because id is not present in database")
