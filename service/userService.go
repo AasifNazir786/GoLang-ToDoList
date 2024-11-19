@@ -1,6 +1,7 @@
 package service
 
 import (
+	"Go-GitHub-Projects/GoLang-ToDoList/types"
 	"database/sql"
 	"fmt"
 	"log"
@@ -8,7 +9,8 @@ import (
 
 var db *sql.DB
 
-func init() {
+// InitDB initializes the connection to the PostgreSQL database.
+func InitDB() {
 	connStr := "name=postgres password=njasm786 dbname=todo-db sslmode=disable"
 	var err error
 	db, err = sql.Open("postgres", connStr)
@@ -16,11 +18,41 @@ func init() {
 		log.Fatalf("Unable to connect to database: %v", err)
 	}
 
-	err = db.Ping()
-	if err != nil {
+	if err = db.Ping(); err != nil {
 		log.Fatalf("Database connection is not alive: %v", err)
 	}
 	fmt.Println("Connected to the database!")
+}
+
+func AddUser(user types.User) error {
+	query := `INSERT INTO users (first_name, last_name, email, country, state, city, zipcode)
+				VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING user_id`
+
+	var id int
+
+	err := db.QueryRow(query, user.FirstName, user.LastName, user.UserEmail, user.UserAddress.Country,
+		user.UserAddress.State, user.UserAddress.City, user.UserAddress.ZipCode).Scan(&id)
+
+	if err != nil {
+		return err
+	}
+
+	user.UserId = id
+	return nil
+}
+
+func GetAllUsers() ([]types.User, error) {
+	query := `SELECT * FROM users`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	var user types.User
+	var address types.Address
+	for rows.Next() {
+
+	}
 }
 
 // // In-memory database of users

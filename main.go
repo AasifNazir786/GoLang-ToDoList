@@ -8,6 +8,8 @@ import (
 
 func main() {
 	fmt.Println("Hello World")
+
+	service.InitDB()
 	//create an Object of Address struct
 	address := types.Address{
 		Country: "India",
