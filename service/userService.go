@@ -24,6 +24,7 @@ func InitDB() {
 	fmt.Println("Connected to the database!")
 }
 
+// this method adds new users into databases
 func AddUser(user types.User) error {
 	query := `INSERT INTO users (first_name, last_name, email, country, state, city, zipcode)
 				VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING user_id`
@@ -41,6 +42,7 @@ func AddUser(user types.User) error {
 	return nil
 }
 
+// this method retrieves all the users present in databases
 func GetAllUsers() ([]types.User, error) {
 	query := `SELECT * FROM users`
 
@@ -48,10 +50,66 @@ func GetAllUsers() ([]types.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	var user types.User
-	var address types.Address
+	defer rows.Close()
+
+	var users []types.User
 	for rows.Next() {
 
+		var user types.User
+		var address types.Address
+
+		if err := rows.Scan(&user.UserId, &user.FirstName, &user.LastName, &user.UserEmail,
+			&address.Country, &address.State, &address.City, &address.ZipCode); err != nil {
+			return nil, err
+		}
+
+		user.UserAddress = address
+		users = append(users, user)
+	}
+	return users, nil
+}
+
+// retrieve a specific user by its ID
+func GetUserById(id int) (types.User, error) {
+	query := `SELECT * FROM users WHERE user_id = $1`
+
+	var user types.User
+	var address types.Address
+
+	err := db.QueryRow(query, id).Scan(
+		&user.UserId, &user.FirstName, &user.LastName, &user.UserEmail,
+		&address.Country, &address.State, &address.City, &address.ZipCode)
+	if err != nil {
+		return types.User{}, err
+	}
+	user.UserAddress = address
+	return user, nil
+}
+
+// this method updates the existing user
+func UpdateUser(id int, updatedUser types.User) error {
+	query := `
+		UPDATE users
+		SET first_name = $1, last_name = $2, email = $3, country = $4, state = $5, city = $6, zipcode = $7
+		WHERE user_id = $8
+		`
+	_, err := db.Exec(query, query, updatedUser.FirstName, updatedUser.LastName, updatedUser.UserEmail, updatedUser.UserAddress.Country,
+		updatedUser.UserAddress.State, updatedUser.UserAddress.City, updatedUser.UserAddress.ZipCode, id)
+
+	return err
+}
+
+// this method deletes the user from database
+func DeleteUser(userId int) error {
+	query := `DELETE FROM users WHERE user_id = $1;`
+	_, err := db.Exec(query, userId)
+	return err
+}
+
+func CloseDB() {
+	if db != nil {
+		_ = db.Close()
+		fmt.Println("Database connection closed.")
 	}
 }
 
